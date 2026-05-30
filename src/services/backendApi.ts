@@ -41,7 +41,9 @@ export async function createSession(
 }
 
 export async function getSession(sessionId: string): Promise<Session> {
-  const res = await fetch(`${base}/session?id=${encodeURIComponent(sessionId)}`)
+  // Route is /session/{id} but controller reads from query param ?id=
+  // so we need both: path segment + query param
+  const res = await fetch(`${base}/session/${encodeURIComponent(sessionId)}?id=${encodeURIComponent(sessionId)}`)
   if (!res.ok) throw new Error(`session/get failed: ${res.status}`)
   return res.json() as Promise<Session>
 }

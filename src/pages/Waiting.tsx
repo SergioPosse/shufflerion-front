@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { config } from '../config'
-import { loadPendingAuth, loadHostTokens } from '../utils/storage'
+import { loadGuestEmail, loadHostTokens } from '../utils/storage'
 import { getSession } from '../services/backendApi'
 
 type Status = 'waiting' | 'connecting' | 'error'
@@ -14,7 +14,7 @@ export default function Waiting() {
   const wsRef = useRef<WebSocket | null>(null)
   const ran = useRef(false)
 
-  const guestEmail = loadPendingAuth()?.guestEmail ?? ''
+  const guestEmail = loadGuestEmail()
 
   const origin = window.location.origin
   const inviteLink = `${origin}/join?sessionId=${sessionId}&guestEmail=${encodeURIComponent(guestEmail)}`

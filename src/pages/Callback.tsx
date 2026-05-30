@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { loadPendingAuth, clearPendingAuth, saveHostTokens, saveSessionId } from '../utils/storage'
+import { loadPendingAuth, clearPendingAuth, saveHostTokens, saveSessionId, saveGuestEmail } from '../utils/storage'
 import { exchangeCode, createSession, updateSession } from '../services/backendApi'
 
 type Step = 'exchanging' | 'saving-session' | 'done' | 'error'
@@ -49,6 +49,7 @@ export default function Callback() {
         if (pending!.type === 'host') {
           // Host: create the session with host tokens, then wait for guest
           saveHostTokens(tokens)
+          saveGuestEmail(pending!.guestEmail)
           await createSession(pending!.sessionId, pending!.hostEmail, tokens)
           saveSessionId(pending!.sessionId)
           clearPendingAuth()

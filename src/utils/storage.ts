@@ -43,6 +43,14 @@ export function loadSessionId(): string | null {
   return sessionStorage.getItem(KEYS.sessionId)
 }
 
+export function saveGuestEmail(email: string): void {
+  sessionStorage.setItem('shufflerion_guest_email', email)
+}
+
+export function loadGuestEmail(): string {
+  return sessionStorage.getItem('shufflerion_guest_email') ?? ''
+}
+
 export function clearSession(): void {
   Object.values(KEYS).forEach((k) => sessionStorage.removeItem(k))
 }
