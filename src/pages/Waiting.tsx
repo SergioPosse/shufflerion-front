@@ -16,7 +16,8 @@ export default function Waiting() {
 
   const guestEmail = loadPendingAuth()?.guestEmail ?? ''
 
-  const inviteLink = `${config.authFrontUrl}/?sessionId=${sessionId}&guestEmail=${encodeURIComponent(guestEmail)}`
+  const origin = window.location.origin
+  const inviteLink = `${origin}/join?sessionId=${sessionId}&guestEmail=${encodeURIComponent(guestEmail)}`
 
   const goToPlayer = useCallback(() => {
     navigate(`/player/${sessionId}`, { replace: true })

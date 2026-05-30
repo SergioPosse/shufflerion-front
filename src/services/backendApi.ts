@@ -46,6 +46,28 @@ export async function getSession(sessionId: string): Promise<Session> {
   return res.json() as Promise<Session>
 }
 
+export async function updateSession(
+  sessionId: string,
+  guestEmail: string,
+  guestTokens: TokenPair,
+): Promise<void> {
+  const res = await fetch(`${base}/session/update`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: sessionId,
+      guest: {
+        email: guestEmail,
+        tokens: {
+          accessToken: guestTokens.accessToken,
+          refreshToken: guestTokens.refreshToken,
+        },
+      },
+    }),
+  })
+  if (!res.ok) throw new Error(`session/update failed: ${res.status}`)
+}
+
 export async function fetchSongs(
   accessToken1: string,
   accessToken2: string,

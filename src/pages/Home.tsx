@@ -24,7 +24,7 @@ export default function Home() {
     try {
       const sessionId = generateSessionId()
 
-      savePendingAuth({ sessionId, hostEmail, guestEmail })
+      savePendingAuth({ type: 'host', sessionId, hostEmail, guestEmail })
 
       const params = new URLSearchParams({
         client_id: config.spotifyClientId,

@@ -28,8 +28,7 @@ export interface Session {
 }
 
 // What we persist in sessionStorage for the auth flow
-export interface PendingAuth {
-  sessionId: string
-  hostEmail: string
-  guestEmail: string
-}
+// Discriminated union so Callback.tsx knows which path to take
+export type PendingAuth =
+  | { type: 'host'; sessionId: string; hostEmail: string; guestEmail: string }
+  | { type: 'guest'; sessionId: string; guestEmail: string }
