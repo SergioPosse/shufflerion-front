@@ -31,7 +31,7 @@ export default function Waiting() {
     async function checkAlreadyJoined() {
       try {
         const session = await getSession(sessionId!)
-        if (session.guest?.tokens?.accessToken) {
+        if (session.Guest?.Tokens?.AccessToken) {
           goToPlayer()
           return
         }

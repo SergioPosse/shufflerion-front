@@ -9,22 +9,29 @@ export interface Song {
   Explicit: boolean
 }
 
+// Internal token pair (camelCase — used for local storage and Spotify API)
 export interface TokenPair {
   accessToken: string
   refreshToken: string
 }
 
-export interface SessionUser {
-  email: string
-  tokens: TokenPair
+// Go backend returns capitalized field names (no json tags in the struct)
+export interface ServerTokens {
+  AccessToken: string
+  RefreshToken: string
+}
+
+export interface ServerUser {
+  Email: string
+  Tokens: ServerTokens
 }
 
 export interface Session {
-  id: string
-  host: SessionUser
-  guest: SessionUser
-  createdAt: string
-  updatedAt: string
+  Id: string
+  Host: ServerUser
+  Guest: ServerUser
+  CreatedAt: string
+  UpdatedAt: string
 }
 
 // What we persist in sessionStorage for the auth flow

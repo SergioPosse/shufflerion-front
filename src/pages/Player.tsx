@@ -42,14 +42,17 @@ export default function Player() {
 
         // Host tokens: prefer sessionStorage (may have been refreshed), else use session
         const stored = loadHostTokens()
-        const tokens: TokenPair = stored ?? s.host.tokens
+        const tokens: TokenPair = stored ?? {
+          accessToken: s.Host.Tokens.AccessToken,
+          refreshToken: s.Host.Tokens.RefreshToken,
+        }
         setHostTokens(tokens)
         setHostAccessToken(tokens.accessToken)
 
         // Fetch initial song batch
         const initialSongs = await fetchSongs(
           tokens.accessToken,
-          s.guest.tokens.accessToken,
+          s.Guest.Tokens.AccessToken,
         )
         setSongs(initialSongs)
         setLoadState('ready')
@@ -67,7 +70,7 @@ export default function Player() {
     if (!sessionRef.current || !hostTokensRef.current) return []
     const newSongs = await fetchSongs(
       hostTokensRef.current.accessToken,
-      sessionRef.current.guest.tokens.accessToken,
+      sessionRef.current.Guest.Tokens.AccessToken,
     )
     setSongs(newSongs)
     return newSongs
@@ -178,8 +181,8 @@ export default function Player() {
           {/* Partner info */}
           {session && (
             <div className="text-xs text-spotify-muted text-center space-y-0.5">
-              <p>🎵 {session.host.email}</p>
-              <p>🎵 {session.guest.email}</p>
+              <p>🎵 {session.Host.Email}</p>
+              <p>🎵 {session.Guest.Email}</p>
             </div>
           )}
         </div>
