@@ -1,8 +1,8 @@
-declare global {
-  interface Window {
-    onSpotifyWebPlaybackSDKReady: () => void
-    Spotify: typeof Spotify
-  }
+// Ambient declaration file — no imports/exports so everything here is global
+
+interface Window {
+  onSpotifyWebPlaybackSDKReady: () => void
+  Spotify: typeof Spotify
 }
 
 declare namespace Spotify {
@@ -15,6 +15,9 @@ declare namespace Spotify {
     addListener(event: 'initialization_error', cb: (data: { message: string }) => void): void
     addListener(event: 'authentication_error', cb: (data: { message: string }) => void): void
     addListener(event: 'account_error', cb: (data: { message: string }) => void): void
+    removeListener(event: 'ready', cb?: (data: { device_id: string }) => void): void
+    removeListener(event: 'not_ready', cb?: (data: { device_id: string }) => void): void
+    removeListener(event: 'player_state_changed', cb?: (state: PlaybackState | null) => void): void
     removeListener(event: string, cb?: (...args: unknown[]) => void): void
     togglePlay(): Promise<void>
     setVolume(volume: number): Promise<void>
@@ -27,7 +30,6 @@ declare namespace Spotify {
     volume?: number
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Player: new (options: PlayerConstructorOptions) => Player
 
   interface PlaybackState {

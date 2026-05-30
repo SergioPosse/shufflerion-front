@@ -10,7 +10,6 @@ import PlayerControls from '../components/PlayerControls'
 import VolumeControl from '../components/VolumeControl'
 import SongList from '../components/SongList'
 import type { Song, TokenPair, Session } from '../types'
-import { config } from '../config'
 
 type LoadState = 'loading' | 'ready' | 'error'
 
