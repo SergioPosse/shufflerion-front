@@ -36,7 +36,7 @@ export default function Join() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="h-full flex items-center justify-center p-4 overflow-y-auto">
         <div className="card max-w-md text-center space-y-3">
           <p className="text-2xl">⚠️</p>
           <p className="text-white font-semibold">Invalid invite link</p>
@@ -47,7 +47,7 @@ export default function Join() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-full flex items-center justify-center p-4 overflow-y-auto">
       <div className="text-center space-y-6">
         <div>
           <h1 className="text-3xl font-bold">

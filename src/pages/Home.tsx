@@ -42,7 +42,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-full flex items-center justify-center p-4 overflow-y-auto">
       <div className="w-full max-w-md">
         {/* Logo / title */}
         <div className="text-center mb-10">

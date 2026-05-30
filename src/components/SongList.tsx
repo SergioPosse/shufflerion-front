@@ -5,12 +5,12 @@ interface Props {
   songs: Song[]
   currentIndex: number
   hasStarted: boolean
+  failedIndices: Set<number>
 }
 
-export default function SongList({ songs, currentIndex, hasStarted }: Props) {
+export default function SongList({ songs, currentIndex, hasStarted, failedIndices }: Props) {
   const currentRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to current song whenever it changes
   useEffect(() => {
     currentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [currentIndex])
@@ -23,7 +23,6 @@ export default function SongList({ songs, currentIndex, hasStarted }: Props) {
     )
   }
 
-  // Only reveal songs up to and including the current one
   const revealedSongs = songs.slice(0, currentIndex + 1)
 
   return (
@@ -35,6 +34,7 @@ export default function SongList({ songs, currentIndex, hasStarted }: Props) {
       <div className="overflow-y-auto flex-1 space-y-1 pr-1">
         {revealedSongs.map((song, i) => {
           const isCurrent = i === currentIndex
+          const isFailed = failedIndices.has(i)
 
           return (
             <div
@@ -42,10 +42,9 @@ export default function SongList({ songs, currentIndex, hasStarted }: Props) {
               ref={isCurrent ? currentRef : undefined}
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300
-                ${isCurrent
-                  ? 'bg-spotify-green/15 ring-1 ring-spotify-green'
-                  : 'bg-white/5'
-                }
+                ${isCurrent ? 'bg-spotify-green/15 ring-1 ring-spotify-green' : ''}
+                ${isFailed ? 'bg-red-900/20 ring-1 ring-red-800/50 opacity-60' : ''}
+                ${!isCurrent && !isFailed ? 'bg-white/5' : ''}
               `}
             >
               {/* Thumbnail */}
@@ -55,28 +54,38 @@ export default function SongList({ songs, currentIndex, hasStarted }: Props) {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-spotify-muted text-xs">♪</div>
                 )}
-                {isCurrent && (
+                {isCurrent && !isFailed && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="text-spotify-green text-xs font-bold">▶</span>
+                  </div>
+                )}
+                {isFailed && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="text-red-400 text-xs">✕</span>
                   </div>
                 )}
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${isCurrent ? 'text-spotify-green' : 'text-white/80'}`}>
+                <p className={`text-sm font-medium truncate ${isCurrent ? 'text-spotify-green' : isFailed ? 'text-red-400/70' : 'text-white/80'}`}>
                   {song.Title}
                 </p>
-                <p className="text-xs text-spotify-muted truncate">{song.Artist}</p>
+                <p className="text-xs truncate text-spotify-muted">{song.Artist}</p>
+                {isFailed && (
+                  <p className="text-xs text-red-400/60 mt-0.5">Not available</p>
+                )}
               </div>
 
               {/* Right side */}
-              <div className="flex items-center gap-2 shrink-0">
-                {song.Explicit && (
-                  <span className="text-xs bg-white/10 text-spotify-muted px-1.5 py-0.5 rounded">E</span>
-                )}
-                <span className="text-xs text-spotify-muted">{formatDuration(song.Duration)}</span>
-              </div>
+              {!isFailed && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {song.Explicit && (
+                    <span className="text-xs bg-white/10 text-spotify-muted px-1.5 py-0.5 rounded">E</span>
+                  )}
+                  <span className="text-xs text-spotify-muted">{formatDuration(song.Duration)}</span>
+                </div>
+              )}
             </div>
           )
         })}

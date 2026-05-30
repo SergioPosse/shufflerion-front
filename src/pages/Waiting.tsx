@@ -87,7 +87,7 @@ export default function Waiting() {
   const tokens = loadHostTokens()
   if (!tokens) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="h-full flex items-center justify-center p-4 overflow-y-auto">
         <div className="card text-center space-y-3">
           <p className="text-white">Session not found.</p>
           <a href="/" className="btn-primary inline-block">Start over</a>
@@ -103,7 +103,7 @@ export default function Waiting() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-full flex items-center justify-center p-4 overflow-y-auto">
       <div className="w-full max-w-lg space-y-8">
         {/* Header */}
         <div className="text-center">

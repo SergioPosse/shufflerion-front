@@ -2,7 +2,6 @@ import { config } from '../config'
 import type { TokenPair } from '../types'
 
 const SPOTIFY_API = 'https://api.spotify.com/v1'
-const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
 // Transfer playback to the SDK device before issuing play commands
 export async function activateDevice(accessToken: string, deviceId: string): Promise<void> {
@@ -48,23 +47,17 @@ export async function setSpotifyVolume(
   )
 }
 
-// Refresh using PKCE flow — only client_id needed, no client_secret
+// Refresh via backend — keeps client_secret on the server
 export async function refreshAccessToken(tokens: TokenPair): Promise<TokenPair> {
-  const body = new URLSearchParams({
-    client_id: config.spotifyClientId,
-    grant_type: 'refresh_token',
-    refresh_token: tokens.refreshToken,
-  })
-  const res = await fetch(SPOTIFY_TOKEN_URL, {
+  const res = await fetch(`${config.backendUrl}/auth/refresh`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: tokens.refreshToken }),
   })
   if (!res.ok) throw new Error(`Token refresh failed: ${res.status}`)
-  const data = (await res.json()) as { access_token: string; refresh_token?: string }
+  const data = (await res.json()) as { access_token: string; refresh_token: string }
   return {
     accessToken: data.access_token,
-    // Spotify may rotate the refresh token; fall back to the old one if not
     refreshToken: data.refresh_token ?? tokens.refreshToken,
   }
 }

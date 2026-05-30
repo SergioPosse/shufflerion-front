@@ -5,6 +5,7 @@ import { getSession, fetchSongs } from '../services/backendApi'
 import { useSpotifyPlayer } from '../hooks/useSpotifyPlayer'
 import { usePlayerState } from '../hooks/usePlayerState'
 import { useTokenRefresh } from '../hooks/useTokenRefresh'
+import { useKeepAlive } from '../hooks/useKeepAlive'
 import NowPlaying from '../components/NowPlaying'
 import PlayerControls from '../components/PlayerControls'
 import VolumeControl from '../components/VolumeControl'
@@ -23,12 +24,15 @@ export default function Player() {
   const [session, setSession] = useState<Session | null>(null)
   const [hostTokens, setHostTokens] = useState<TokenPair | null>(null)
   const [hostAccessToken, setHostAccessToken] = useState<string | null>(null)
+  const [guestAccessToken, setGuestAccessToken] = useState<string | null>(null)
 
   const sessionRef = useRef<Session | null>(null)
   const hostTokensRef = useRef<TokenPair | null>(null)
+  const guestAccessTokenRef = useRef<string | null>(null)
 
   useEffect(() => { sessionRef.current = session }, [session])
   useEffect(() => { hostTokensRef.current = hostTokens }, [hostTokens])
+  useEffect(() => { guestAccessTokenRef.current = guestAccessToken }, [guestAccessToken])
 
   // Bootstrap: load session + songs
   useEffect(() => {
@@ -48,6 +52,7 @@ export default function Player() {
         }
         setHostTokens(tokens)
         setHostAccessToken(tokens.accessToken)
+        setGuestAccessToken(s.Guest.Tokens.AccessToken)
 
         // Fetch initial song batch
         const initialSongs = await fetchSongs(
@@ -70,7 +75,7 @@ export default function Player() {
     if (!sessionRef.current || !hostTokensRef.current) return []
     const newSongs = await fetchSongs(
       hostTokensRef.current.accessToken,
-      sessionRef.current.Guest.Tokens.AccessToken,
+      guestAccessTokenRef.current ?? sessionRef.current.Guest.Tokens.AccessToken,
     )
     setSongs(newSongs)
     return newSongs
@@ -86,9 +91,20 @@ export default function Player() {
     }
   }, [])
 
+  const handleGuestTokenRefreshed = useCallback((newToken: string) => {
+    setGuestAccessToken(newToken)
+    guestAccessTokenRef.current = newToken
+  }, [])
+
+  useKeepAlive()
+
   useTokenRefresh({
     hostTokens,
+    guestRefreshToken: session?.Guest.Tokens.RefreshToken ?? null,
+    sessionId: sessionId ?? null,
+    guestEmail: session?.Guest.Email ?? null,
     onHostTokenRefreshed: handleHostTokenRefreshed,
+    onGuestTokenRefreshed: handleGuestTokenRefreshed,
   })
 
   const { player, deviceId } = useSpotifyPlayer(hostAccessToken)
@@ -97,6 +113,7 @@ export default function Player() {
     isPlaying,
     currentSongIndex,
     hasStarted,
+    failedIndices,
     handleStart,
     handleNext,
     handlePrev,
@@ -139,9 +156,9 @@ export default function Player() {
   const sdkReady = !!deviceId
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 shrink-0">
         <h1 className="text-lg font-bold">
           Shuffler<span className="text-spotify-green">ion</span>
         </h1>
@@ -149,9 +166,9 @@ export default function Player() {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 p-6 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-6 p-6 overflow-hidden">
         {/* Left: now playing + controls */}
-        <div className="flex flex-col items-center gap-6 lg:w-80 shrink-0">
+        <div className="flex flex-col items-center gap-4 lg:w-72 shrink-0 overflow-y-auto">
           <NowPlaying song={currentSong} isPlaying={isPlaying} />
 
           {!hasStarted && (
@@ -189,7 +206,7 @@ export default function Player() {
 
         {/* Right: song list — fixed height so it scrolls independently */}
         <div className="flex-1 min-h-0 h-64 lg:h-auto overflow-hidden">
-          <SongList songs={songs} currentIndex={currentSongIndex} hasStarted={hasStarted} />
+          <SongList songs={songs} currentIndex={currentSongIndex} hasStarted={hasStarted} failedIndices={failedIndices} />
         </div>
       </div>
     </div>
