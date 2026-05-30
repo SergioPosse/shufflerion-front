@@ -32,5 +32,4 @@ export interface PendingAuth {
   sessionId: string
   hostEmail: string
   guestEmail: string
-  codeVerifier: string
 }

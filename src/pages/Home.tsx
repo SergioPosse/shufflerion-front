@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { config } from '../config'
-import { generateCodeVerifier, generateCodeChallenge } from '../utils/pkce'
 import { savePendingAuth } from '../utils/storage'
 
 function generateSessionId(): string {
@@ -24,19 +23,14 @@ export default function Home() {
 
     try {
       const sessionId = generateSessionId()
-      const codeVerifier = generateCodeVerifier()
-      const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-      // Save everything we need to reconstruct context after the OAuth redirect
-      savePendingAuth({ sessionId, hostEmail, guestEmail, codeVerifier })
+      savePendingAuth({ sessionId, hostEmail, guestEmail })
 
       const params = new URLSearchParams({
         client_id: config.spotifyClientId,
         response_type: 'code',
         redirect_uri: config.spotifyRedirectUri,
         scope: config.spotifyScopes,
-        code_challenge_method: 'S256',
-        code_challenge: codeChallenge,
         show_dialog: 'false',
       })
 

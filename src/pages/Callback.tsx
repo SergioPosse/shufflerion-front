@@ -41,7 +41,7 @@ export default function Callback() {
     async function finish() {
       try {
         setStep('exchanging')
-        const tokens = await exchangeCode(code!, pending!.codeVerifier)
+        const tokens = await exchangeCode(code!)
         saveHostTokens(tokens)
 
         setStep('creating-session')
