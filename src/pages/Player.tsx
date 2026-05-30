@@ -187,8 +187,8 @@ export default function Player() {
           )}
         </div>
 
-        {/* Right: song list */}
-        <div className="flex-1 overflow-hidden">
+        {/* Right: song list — fixed height so it scrolls independently */}
+        <div className="flex-1 min-h-0 h-64 lg:h-auto overflow-hidden">
           <SongList songs={songs} currentIndex={currentSongIndex} hasStarted={hasStarted} />
         </div>
       </div>

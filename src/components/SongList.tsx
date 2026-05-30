@@ -8,88 +8,79 @@ interface Props {
 }
 
 export default function SongList({ songs, currentIndex, hasStarted }: Props) {
-  const listRef = useRef<HTMLDivElement>(null)
   const currentRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to current song
+  // Auto-scroll to current song whenever it changes
   useEffect(() => {
     currentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [currentIndex])
 
-  if (songs.length === 0) {
+  if (!hasStarted || songs.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
-        <p className="text-spotify-muted">Loading songs…</p>
+        <p className="text-spotify-muted text-sm">Songs will appear here as they play</p>
       </div>
     )
   }
 
+  // Only reveal songs up to and including the current one
+  const revealedSongs = songs.slice(0, currentIndex + 1)
+
   return (
-    <div
-      ref={listRef}
-      className="h-full overflow-y-auto space-y-1 pr-1"
-      aria-label="Song queue"
-    >
-      <p className="text-xs text-spotify-muted uppercase tracking-wider mb-3 px-2">
-        Up next — {songs.length} songs
+    <div className="flex flex-col h-full">
+      <p className="text-xs text-spotify-muted uppercase tracking-wider mb-3 px-1 shrink-0">
+        Played — {revealedSongs.length} song{revealedSongs.length !== 1 ? 's' : ''}
       </p>
 
-      {songs.map((song, i) => {
-        const isCurrent = hasStarted && i === currentIndex
-        const isPast = hasStarted && i < currentIndex
+      <div className="overflow-y-auto flex-1 space-y-1 pr-1">
+        {revealedSongs.map((song, i) => {
+          const isCurrent = i === currentIndex
 
-        return (
-          <div
-            key={`${song.Url}-${i}`}
-            ref={isCurrent ? currentRef : undefined}
-            className={`
-              flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150
-              ${isCurrent ? 'bg-white/10 ring-1 ring-spotify-green' : 'hover:bg-white/5'}
-              ${isPast ? 'opacity-40' : ''}
-            `}
-          >
-            {/* Thumbnail */}
-            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-spotify-surface">
-              {song.Image ? (
-                <img src={song.Image} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-spotify-muted text-xs">
-                  ♪
-                </div>
-              )}
-              {isCurrent && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <span className="text-spotify-green text-xs">▶</span>
-                </div>
-              )}
+          return (
+            <div
+              key={`${song.Url}-${i}`}
+              ref={isCurrent ? currentRef : undefined}
+              className={`
+                flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300
+                ${isCurrent
+                  ? 'bg-spotify-green/15 ring-1 ring-spotify-green'
+                  : 'bg-white/5'
+                }
+              `}
+            >
+              {/* Thumbnail */}
+              <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-spotify-surface">
+                {song.Image ? (
+                  <img src={song.Image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-spotify-muted text-xs">♪</div>
+                )}
+                {isCurrent && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="text-spotify-green text-xs font-bold">▶</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium truncate ${isCurrent ? 'text-spotify-green' : 'text-white/80'}`}>
+                  {song.Title}
+                </p>
+                <p className="text-xs text-spotify-muted truncate">{song.Artist}</p>
+              </div>
+
+              {/* Right side */}
+              <div className="flex items-center gap-2 shrink-0">
+                {song.Explicit && (
+                  <span className="text-xs bg-white/10 text-spotify-muted px-1.5 py-0.5 rounded">E</span>
+                )}
+                <span className="text-xs text-spotify-muted">{formatDuration(song.Duration)}</span>
+              </div>
             </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <p
-                className={`text-sm font-medium truncate ${
-                  isCurrent ? 'text-white' : 'text-white/80'
-                }`}
-              >
-                {song.Title}
-              </p>
-              <p className="text-xs text-spotify-muted truncate">{song.Artist}</p>
-            </div>
-
-            {/* Explicit badge */}
-            {song.Explicit && (
-              <span className="text-xs bg-white/10 text-spotify-muted px-1.5 py-0.5 rounded shrink-0">
-                E
-              </span>
-            )}
-
-            {/* Duration */}
-            <span className="text-xs text-spotify-muted shrink-0">
-              {formatDuration(song.Duration)}
-            </span>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
